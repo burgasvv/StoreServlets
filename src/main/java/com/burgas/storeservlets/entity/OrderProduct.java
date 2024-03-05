@@ -1,4 +1,4 @@
-package entity;
+package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
@@ -7,7 +7,7 @@ public class OrderProduct {
     private Product product;
     private Order order;
 
-    public OrderProduct(entity.Product product, Order order) {
+    public OrderProduct(Product product, Order order) {
         this.product = product;
         this.order = order;
     }

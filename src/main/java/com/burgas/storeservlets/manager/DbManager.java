@@ -1,4 +1,4 @@
-package manager;
+package com.burgas.storeservlets.manager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ public class DbManager {
 
     public static Connection createConnection() {
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName(PROPERTIES.getProperty("driver"));
             return DriverManager.getConnection(URL, PROPERTIES);
 
         } catch (SQLException | ClassNotFoundException e) {

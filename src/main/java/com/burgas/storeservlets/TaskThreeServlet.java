@@ -5,9 +5,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import service.StoreService;
+import com.burgas.storeservlets.service.OrderService;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @WebServlet(name = "TaskThreeServlet", value = "/task_three-servlet")
 public class TaskThreeServlet extends HttpServlet {
@@ -15,8 +16,12 @@ public class TaskThreeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        StoreService service = new StoreService();
-        req.setAttribute("order numbers", service.getOrderNumberByProductName("Apples"));
+        String productName = Objects.requireNonNull(
+                req.getParameter("product_name"),
+                "Product name is null"
+        );
+        OrderService service = new OrderService();
+        req.setAttribute("order numbers", service.getByProductName(productName));
         req.getRequestDispatcher("/task_three.jsp").forward(req,resp);
     }
 }

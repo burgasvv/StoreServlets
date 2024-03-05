@@ -1,4 +1,4 @@
-package entity;
+package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 

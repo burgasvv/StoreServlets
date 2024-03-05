@@ -1,17 +1,23 @@
-package service;
+package com.burgas.storeservlets.service;
 
-import entity.Product;
-import entity.OrderProduct;
-import entity.Order;
-import manager.DbManager;
+import com.burgas.storeservlets.entity.Product;
+import com.burgas.storeservlets.entity.OrderProduct;
+import com.burgas.storeservlets.entity.Order;
+import com.burgas.storeservlets.exception.OrderServiceException;
+import com.burgas.storeservlets.manager.DbManager;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StoreService {
+public class OrderService {
 
-    public List<OrderProduct> getInfoByOrderNumber(final String orderNumber) {
+    /**
+     * Поиск наименования, описания, цены, количества и даты по номеру заказа
+     * @param orderNumber номер заказа
+     * @return лист заказов
+     */
+    public List<OrderProduct> getInfo(String orderNumber) {
 
         List<OrderProduct>goods = new ArrayList<>();
 
@@ -44,11 +50,17 @@ public class StoreService {
             return goods;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't get order number", e.getCause());
         }
     }
 
-    public List<String> getOrderNumberByCondition(final int price, final int productCount) {
+    /**
+     * Поиск заказа по итоговой цене и количеству товара
+     * @param price итоговая цена
+     * @param productCount количество товара
+     * @return номера заказов
+     */
+    public List<String> getBy(int price, int productCount) {
 
         List<String>orderNumbers = new ArrayList<>();
 
@@ -70,11 +82,16 @@ public class StoreService {
             return orderNumbers;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't get price and product count", e.getCause());
         }
     }
 
-    public List<String> getOrderNumberByProductName(final String productName) {
+    /**
+     * Поиск заказов по фигурирующим в них наименованиям товарам
+     * @param productName наименование товара
+     * @return номера заказов
+     */
+    public List<String> getByProductName(String productName) {
 
         List<String>orderNumbers = new ArrayList<>();
 
@@ -97,11 +114,16 @@ public class StoreService {
             return orderNumbers;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't get product name", e.getCause());
         }
     }
 
-    public List<String> getOrderNumberByProductNameAndDate(final String productName) {
+    /**
+     * Поиск заказов по наименованию товара и дате
+     * @param productName наименование товара
+     * @return номера заказов
+     */
+    public List<String> getByProductNameAndDate(String productName) {
 
         List<String>orderNumbers = new ArrayList<>();
 
@@ -125,11 +147,17 @@ public class StoreService {
             return orderNumbers;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't get product name and date", e.getCause());
         }
     }
 
-    public List<OrderProduct> createAndGetTodaySalesOrder(final String orderNumber) {
+
+    /**
+     * Формирование нового заказа по сегоднящним продажам
+     * @param orderNumber номер заказа
+     * @return информацию о заказе
+     */
+    public List<OrderProduct> createAndGet(String orderNumber) {
 
         try (Connection connection = DbManager.createConnection()){
 
@@ -168,14 +196,20 @@ public class StoreService {
             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts);
             insertProductStatement.executeUpdate();
 
-            return getInfoByOrderNumber(orderNumber);
+            return getInfo(orderNumber);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't create and get order number", e.getCause());
         }
     }
 
-    public List<String> getOrderNumbersAndDelete(final String name, final int count) {
+    /**
+     * Удаляет заказы по наименованию и количеству товара
+     * @param name наименование товара
+     * @param count количество товара
+     * @return удаленные заказы
+     */
+    public List<String> getAndDelete(String name, int count) {
 
         List<String> orderNumbers = new ArrayList<>();
 
@@ -206,7 +240,7 @@ public class StoreService {
             return orderNumbers;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OrderServiceException("Can't delete order number", e.getCause());
         }
     }
 }
