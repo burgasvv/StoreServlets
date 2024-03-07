@@ -1,5 +1,6 @@
-package com.burgas.storeservlets.dao;
+package com.burgas.storeservlets.transaction;
 
+import com.burgas.storeservlets.dao.Dao;
 import com.burgas.storeservlets.entity.Entity;
 import com.burgas.storeservlets.manager.DbManager;
 
