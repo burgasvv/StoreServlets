@@ -37,13 +37,14 @@ public class OrderService {
                 String name = resultSet.getString("name");
                 String description = resultSet.getString("description");
                 double price = resultSet.getDouble("price");
-                int productCount = resultSet.getInt("product_count");
                 String date = resultSet.getString("date");
+                int productCount = resultSet.getInt("product_count");
 
                 goods.add(
                         new OrderProduct(
                                 new Product(name,description,price),
-                                new Order(orderNumber,productCount,date)
+                                new Order(orderNumber,date),
+                                productCount
                         )
                 );
             }
@@ -161,7 +162,7 @@ public class OrderService {
 
         try (Connection connection = DbManager.createConnection()){
 
-            String insetOrder = "insert into orders(order_number, date) VALUES (?,now())";
+            String insertOrder = "insert into orders(order_number, date) VALUES (?,now())";
 
             String insertProducts = "do $$\n" +
                     "    declare\n" +
@@ -189,7 +190,7 @@ public class OrderService {
                     "    end;\n" +
                     "$$";
 
-            PreparedStatement insertOrderStatement = connection.prepareStatement(insetOrder);
+            PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
             insertOrderStatement.setString(1,orderNumber);
             insertOrderStatement.execute();
 

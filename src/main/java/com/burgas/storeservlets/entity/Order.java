@@ -2,11 +2,10 @@ package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
-public class Order {
+public class Order extends Entity{
 
     private int id;
     private String orderNumber;
-    private int count;
     private String date;
 
     public Order(int id, String orderNumber, String date) {
@@ -15,9 +14,8 @@ public class Order {
         this.date = date;
     }
 
-    public Order(String orderNumber, int count, String date) {
+    public Order(String orderNumber, String date) {
         this.orderNumber = orderNumber;
-        this.count = count;
         this.date = date;
     }
 
@@ -35,14 +33,6 @@ public class Order {
 
     public void setOrderNumber(String orderNumber) {
         this.orderNumber = orderNumber;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public String getDate() {
@@ -70,7 +60,6 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "orderNumber='" + orderNumber + '\'' +
-                ", count=" + count +
                 ", date='" + date + '\'' +
                 '}';
     }

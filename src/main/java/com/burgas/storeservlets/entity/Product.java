@@ -2,7 +2,7 @@ package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
-public class Product {
+public class Product extends Entity {
 
     private int id;
     private String name;

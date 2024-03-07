@@ -21,7 +21,7 @@ public class TaskTwoServlet extends HttpServlet {
                 "The price is null"
         );
         String productCount = Objects.requireNonNull(
-                req.getParameter("product _count"),
+                req.getParameter("product_count"),
                 "The product count is null"
         );
         OrderService service = new OrderService();
