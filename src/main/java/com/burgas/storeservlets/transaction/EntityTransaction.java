@@ -2,6 +2,7 @@ package com.burgas.storeservlets.transaction;
 
 import com.burgas.storeservlets.dao.Dao;
 import com.burgas.storeservlets.entity.Entity;
+import com.burgas.storeservlets.exception.TransactionException;
 import com.burgas.storeservlets.manager.DbManager;
 
 import java.sql.Connection;
@@ -24,7 +25,7 @@ public class EntityTransaction {
             connection.setAutoCommit(false);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new TransactionException("Can't init transaction", e.getCause());
         }
 
         stream(daos).forEach(
@@ -49,7 +50,7 @@ public class EntityTransaction {
             connection.commit();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new TransactionException("Can't commit changes", e.getCause());
         }
     }
 
@@ -59,7 +60,7 @@ public class EntityTransaction {
             connection.setAutoCommit(true);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new TransactionException("Can't end transaction", e.getCause());
         }
     }
 
@@ -69,7 +70,7 @@ public class EntityTransaction {
             connection.rollback();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new TransactionException("Can't rollback changes", e.getCause());
         }
     }
 }
