@@ -14,12 +14,13 @@ public class OrderService {
 
     /**
      * Поиск наименования, описания, цены, количества и даты по номеру заказа
+     *
      * @param orderNumber номер заказа
      * @return лист заказов
      */
     public List<OrderProduct> getInfo(String orderNumber) {
 
-        List<OrderProduct>goods = new ArrayList<>();
+        List<OrderProduct> goods = new ArrayList<>();
 
         String query = "select name,description,price,product_count,date\n" +
                 "from orders\n" +
@@ -28,9 +29,9 @@ public class OrderService {
                 "where order_number = ?";
 
         try (Connection connection = DbManager.createConnection();
-             PreparedStatement statement = connection.prepareStatement(query)){
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1,orderNumber);
+            statement.setString(1, orderNumber);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -42,8 +43,8 @@ public class OrderService {
 
                 goods.add(
                         new OrderProduct(
-                                new Product(name,description,price),
-                                new Order(orderNumber,date),
+                                new Product(name, description, price),
+                                new Order(orderNumber, date),
                                 productCount
                         )
                 );
@@ -57,20 +58,21 @@ public class OrderService {
 
     /**
      * Поиск заказа по итоговой цене и количеству товара
-     * @param price итоговая цена
+     *
+     * @param price        итоговая цена
      * @param productCount количество товара
      * @return номера заказов
      */
     public List<String> getBy(int price, int productCount) {
 
-        List<String>orderNumbers = new ArrayList<>();
+        List<String> orderNumbers = new ArrayList<>();
 
         String query = "select orders.order_number from orders\n" +
                 "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
                 "group by orders.order_number having sum(product_count * price) < ? and count(product_id) = ?";
 
         try (Connection connection = DbManager.createConnection();
-             PreparedStatement statement = connection.prepareStatement(query)){
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, price);
             statement.setInt(2, productCount);
@@ -90,12 +92,13 @@ public class OrderService {
 
     /**
      * Поиск заказов по фигурирующим в них наименованиям товарам
+     *
      * @param productName наименование товара
      * @return номера заказов
      */
     public List<String> getByProductName(String productName) {
 
-        List<String>orderNumbers = new ArrayList<>();
+        List<String> orderNumbers = new ArrayList<>();
 
         String query = "select orders.order_number\n" +
                 "from orders\n" +
@@ -104,9 +107,9 @@ public class OrderService {
                 "where name = ?";
 
         try (Connection connection = DbManager.createConnection();
-             PreparedStatement statement = connection.prepareStatement(query)){
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1,productName);
+            statement.setString(1, productName);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -123,12 +126,13 @@ public class OrderService {
 
     /**
      * Поиск заказов по наименованию товара и дате
+     *
      * @param productName наименование товара
      * @return номера заказов
      */
     public List<String> getByProductNameAndDate(String productName) {
 
-        List<String>orderNumbers = new ArrayList<>();
+        List<String> orderNumbers = new ArrayList<>();
 
         String query = "select orders.order_number\n" +
                 "from orders\n" +
@@ -138,7 +142,7 @@ public class OrderService {
                 "group by orders.order_number";
 
         try (Connection connection = DbManager.createConnection();
-             PreparedStatement statement = connection.prepareStatement(query)){
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, productName);
             ResultSet resultSet = statement.executeQuery();
@@ -157,6 +161,7 @@ public class OrderService {
 
     /**
      * Формирование нового заказа по сегоднящним продажам
+     *
      * @param orderNumber номер заказа
      * @return информацию о заказе
      */
@@ -192,9 +197,9 @@ public class OrderService {
 
         try (Connection connection = DbManager.createConnection();
              PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
-             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts)){
+             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts)) {
 
-            insertOrderStatement.setString(1,orderNumber);
+            insertOrderStatement.setString(1, orderNumber);
             insertOrderStatement.execute();
 
             insertProductStatement.executeUpdate();
@@ -208,7 +213,8 @@ public class OrderService {
 
     /**
      * Удаляет заказы по наименованию и количеству товара
-     * @param name наименование товара
+     *
+     * @param name  наименование товара
      * @param count количество товара
      * @return удаленные заказы
      */
@@ -225,10 +231,10 @@ public class OrderService {
 
         try (Connection connection = DbManager.createConnection();
              PreparedStatement selectStatement = connection.prepareStatement(select);
-             PreparedStatement deleteStatement = connection.prepareStatement(delete)){
+             PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
 
-            selectStatement.setString(1,name);
-            selectStatement.setInt(2,count);
+            selectStatement.setString(1, name);
+            selectStatement.setInt(2, count);
             ResultSet resultSetSelect = selectStatement.executeQuery();
 
             while (resultSetSelect.next()) {
@@ -236,8 +242,8 @@ public class OrderService {
                 orderNumbers.add(orderNumber);
             }
 
-            deleteStatement.setString(1,name);
-            deleteStatement.setInt(2,count);
+            deleteStatement.setString(1, name);
+            deleteStatement.setInt(2, count);
             deleteStatement.execute();
 
             return orderNumbers;
