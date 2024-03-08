@@ -37,7 +37,8 @@
 ## Проверка задания:
 
 * При первой загрузке проекта может потребоваться загрузить maven project 
-во вкладке Notifications (Notifications - Load Maven Project).
+во вкладке Notifications (Notifications - Load Maven Project) или reload maven 
+во вкладке Maven.
 
 * Открыть файл db.properties и скорректировать параметры подключения
 к своей базе данных. Подключиться к базе данных.
