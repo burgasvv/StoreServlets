@@ -21,15 +21,15 @@ public class OrderService {
 
         List<OrderProduct>goods = new ArrayList<>();
 
-        try (Connection connection = DbManager.createConnection()){
+        String query = "select name,description,price,product_count,date\n" +
+                "from orders\n" +
+                "         join order_products op on orders.id = op.order_id\n" +
+                "         join products p on p.id = op.product_id\n" +
+                "where order_number = ?";
 
-            String query = "select name,description,price,product_count,date\n" +
-                    "from orders\n" +
-                    "         join order_products op on orders.id = op.order_id\n" +
-                    "         join products p on p.id = op.product_id\n" +
-                    "where order_number = ?";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1,orderNumber);
             ResultSet resultSet = statement.executeQuery();
 
@@ -65,13 +65,13 @@ public class OrderService {
 
         List<String>orderNumbers = new ArrayList<>();
 
-        try (Connection connection = DbManager.createConnection()){
+        String query = "select orders.order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
+                "group by orders.order_number having sum(product_count * price) < ? and count(product_id) = ?";
 
-            String query = "select orders.order_number from orders\n" +
-                    "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
-                    "group by orders.order_number having sum(product_count * price) < ? and count(product_id) = ?";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, price);
             statement.setInt(2, productCount);
             ResultSet resultSet = statement.executeQuery();
@@ -80,6 +80,7 @@ public class OrderService {
                 String orderNumber = resultSet.getString("order_number");
                 orderNumbers.add(orderNumber);
             }
+
             return orderNumbers;
 
         } catch (SQLException e) {
@@ -96,15 +97,15 @@ public class OrderService {
 
         List<String>orderNumbers = new ArrayList<>();
 
-        try (Connection connection = DbManager.createConnection()){
+        String query = "select orders.order_number\n" +
+                "from orders\n" +
+                "         join order_products op on orders.id = op.order_id\n" +
+                "         join products p on p.id = op.product_id\n" +
+                "where name = ?";
 
-            String query = "select orders.order_number\n" +
-                    "from orders\n" +
-                    "         join order_products op on orders.id = op.order_id\n" +
-                    "         join products p on p.id = op.product_id\n" +
-                    "where name = ?";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1,productName);
             ResultSet resultSet = statement.executeQuery();
 
@@ -112,6 +113,7 @@ public class OrderService {
                 String orderNumber = resultSet.getString("order_number");
                 orderNumbers.add(orderNumber);
             }
+
             return orderNumbers;
 
         } catch (SQLException e) {
@@ -128,16 +130,16 @@ public class OrderService {
 
         List<String>orderNumbers = new ArrayList<>();
 
-        try (Connection connection = DbManager.createConnection()){
+        String query = "select orders.order_number\n" +
+                "from orders\n" +
+                "         join order_products op on orders.id = op.order_id\n" +
+                "         join products p on p.id = op.product_id\n" +
+                "where name != ? and (select date::timestamp::date) = now()::timestamp::date\n" +
+                "group by orders.order_number";
 
-            String query = "select orders.order_number\n" +
-                    "from orders\n" +
-                    "         join order_products op on orders.id = op.order_id\n" +
-                    "         join products p on p.id = op.product_id\n" +
-                    "where name != ? and (select date::timestamp::date) = now()::timestamp::date\n" +
-                    "group by orders.order_number";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, productName);
             ResultSet resultSet = statement.executeQuery();
 
@@ -160,41 +162,41 @@ public class OrderService {
      */
     public List<OrderProduct> createAndGet(String orderNumber) {
 
-        try (Connection connection = DbManager.createConnection()){
+        String insertOrder = "insert into orders(order_number, date) VALUES (?,now())";
 
-            String insertOrder = "insert into orders(order_number, date) VALUES (?,now())";
+        String insertProducts = "do $$\n" +
+                "    declare\n" +
+                "        count integer := 1;\n" +
+                "        idOrder integer = (select max(orders.id) from orders);\n" +
+                "        end_loop integer = (select count(*) from (\n" +
+                "                     select order_products.product_id as idProduct from order_products\n" +
+                "                        join orders o on o.id = order_products.order_id\n" +
+                "                        join products p on p.id = order_products.product_id\n" +
+                "                     where (select date::date) = now()::date\n" +
+                "                 ) as opopiP);\n" +
+                "    begin\n" +
+                "        while count <= end_loop\n" +
+                "            loop\n" +
+                "                insert into order_products(order_id, product_id, product_count)\n" +
+                "                values (idOrder,\n" +
+                "                        (select array(select opopiP2.idproduct from\n" +
+                "                       (select order_products.product_id as idProduct from order_products\n" +
+                "                                join orders o on o.id = order_products.order_id\n" +
+                "                                join products p on p.id = order_products.product_id\n" +
+                "                             where (select date::date) = now()::date) as opopiP2))[count],\n" +
+                "                        (select floor(random() * 10 + 1)::integer));\n" +
+                "                count := count + 1;\n" +
+                "            end loop;\n" +
+                "    end;\n" +
+                "$$";
 
-            String insertProducts = "do $$\n" +
-                    "    declare\n" +
-                    "        count integer := 1;\n" +
-                    "        idOrder integer = (select max(orders.id) from orders);\n" +
-                    "        end_loop integer = (select count(*) from (\n" +
-                    "                     select order_products.product_id as idProduct from order_products\n" +
-                    "                        join orders o on o.id = order_products.order_id\n" +
-                    "                        join products p on p.id = order_products.product_id\n" +
-                    "                     where (select date::date) = now()::date\n" +
-                    "                 ) as opopiP);\n" +
-                    "    begin\n" +
-                    "        while count <= end_loop\n" +
-                    "            loop\n" +
-                    "                insert into order_products(order_id, product_id, product_count)\n" +
-                    "                values (idOrder,\n" +
-                    "                        (select array(select opopiP2.idproduct from\n" +
-                    "                       (select order_products.product_id as idProduct from order_products\n" +
-                    "                                join orders o on o.id = order_products.order_id\n" +
-                    "                                join products p on p.id = order_products.product_id\n" +
-                    "                             where (select date::date) = now()::date) as opopiP2))[count],\n" +
-                    "                        (select floor(random() * 10 + 1)::integer));\n" +
-                    "                count := count + 1;\n" +
-                    "            end loop;\n" +
-                    "    end;\n" +
-                    "$$";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
+             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts);){
 
-            PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
             insertOrderStatement.setString(1,orderNumber);
             insertOrderStatement.execute();
 
-            PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts);
             insertProductStatement.executeUpdate();
 
             return getInfo(orderNumber);
@@ -214,26 +216,25 @@ public class OrderService {
 
         List<String> orderNumbers = new ArrayList<>();
 
-        try (Connection connection = DbManager.createConnection()){
+        String select = "select order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
+                "where name = ? and product_count = ? and order_id = orders.id;";
 
-            String select = "select order_number from orders\n" +
-                    "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
-                    "where name = ? and product_count = ? and order_id = orders.id;";
+        String delete = "delete from orders using products, order_products " +
+                "where name = ? and product_count = ? and order_id = orders.id";
 
-            String delete = "delete from orders using products, order_products " +
-                    "where name = ? and product_count = ? and order_id = orders.id";
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement selectStatement = connection.prepareStatement(select);
+             PreparedStatement deleteStatement = connection.prepareStatement(delete)){
 
-            PreparedStatement selectStatement = connection.prepareStatement(select);
             selectStatement.setString(1,name);
             selectStatement.setInt(2,count);
             ResultSet resultSetSelect = selectStatement.executeQuery();
-
             while (resultSetSelect.next()) {
                 String orderNumber = resultSetSelect.getString("order_number");
                 orderNumbers.add(orderNumber);
             }
 
-            PreparedStatement deleteStatement = connection.prepareStatement(delete);
             deleteStatement.setString(1,name);
             deleteStatement.setInt(2,count);
             deleteStatement.execute();
