@@ -192,7 +192,7 @@ public class OrderService {
 
         try (Connection connection = DbManager.createConnection();
              PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
-             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts);){
+             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts)){
 
             insertOrderStatement.setString(1,orderNumber);
             insertOrderStatement.execute();
@@ -230,6 +230,7 @@ public class OrderService {
             selectStatement.setString(1,name);
             selectStatement.setInt(2,count);
             ResultSet resultSetSelect = selectStatement.executeQuery();
+
             while (resultSetSelect.next()) {
                 String orderNumber = resultSetSelect.getString("order_number");
                 orderNumbers.add(orderNumber);
