@@ -199,10 +199,14 @@ public class OrderService {
              PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
              PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts)) {
 
+            connection.setAutoCommit(false);
+
             insertOrderStatement.setString(1, orderNumber);
             insertOrderStatement.execute();
 
             insertProductStatement.executeUpdate();
+
+            connection.commit();
 
             return getInfo(orderNumber);
 
@@ -233,6 +237,8 @@ public class OrderService {
              PreparedStatement selectStatement = connection.prepareStatement(select);
              PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
 
+            connection.setAutoCommit(false);
+
             selectStatement.setString(1, name);
             selectStatement.setInt(2, count);
             ResultSet resultSetSelect = selectStatement.executeQuery();
@@ -245,6 +251,8 @@ public class OrderService {
             deleteStatement.setString(1, name);
             deleteStatement.setInt(2, count);
             deleteStatement.execute();
+
+            connection.commit();
 
             return orderNumbers;
 
