@@ -22,6 +22,6 @@ public class TaskFourServlet extends HttpServlet {
         );
         OrderService service = new OrderService();
         req.setAttribute("order numbers",service.getByProductNameAndDate(productName));
-        req.getRequestDispatcher("/task_four.jsp").forward(req,resp);
+        req.getRequestDispatcher("/task/task_four.jsp").forward(req,resp);
     }
 }

@@ -26,6 +26,6 @@ public class TaskTwoServlet extends HttpServlet {
         );
         OrderService service = new OrderService();
         req.setAttribute("order numbers", service.getBy(Integer.parseInt(price), Integer.parseInt(productCount)));
-        req.getRequestDispatcher("/task_two.jsp").forward(req,resp);
+        req.getRequestDispatcher("/task/task_two.jsp").forward(req,resp);
     }
 }
