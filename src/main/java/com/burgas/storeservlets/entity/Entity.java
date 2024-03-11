@@ -1,5 +1,9 @@
 package com.burgas.storeservlets.entity;
 
+/**
+ * Сущность, которая описывает базовую информацию во всех таблицах
+ * id - идентификатор
+ */
 public class Entity {
 
     private int id;

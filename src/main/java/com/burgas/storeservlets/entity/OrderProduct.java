@@ -2,6 +2,12 @@ package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
+/**
+ * Сущность, которая описывает в таблице связь "Многие-ко-многим" таблиц продуктов и заказов
+ * Product - сущность таблицы продуктов
+ * Order - сущность таблицы заказов
+ * productCount - количество каждого товара
+ */
 public class OrderProduct extends Entity {
 
     private Product product;

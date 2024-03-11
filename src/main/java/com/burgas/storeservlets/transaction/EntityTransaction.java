@@ -11,10 +11,19 @@ import java.util.Objects;
 
 import static java.util.Arrays.*;
 
+/**
+ * Сущность, которая описывает транзакционные методы для паттерна Dao,
+ *      позволяющие управлять логикой сохранения и фиксации изменений в базе данных
+ * connection - объект соединения
+ */
 public class EntityTransaction {
 
     private Connection connection;
 
+    /**
+     * Установка соединения со всеми объектами паттерна и отключение авто-фиксации изменений
+     * @param daos объекты паттерна Dao
+     */
     @SafeVarargs
     public final void initTransaction(Dao<? extends Entity>... daos) {
 
@@ -33,6 +42,10 @@ public class EntityTransaction {
         );
     }
 
+    /**
+     * Установка соединения со всеми объектами паттерна
+     * @param daos объекты паттерна Dao
+     */
     @SafeVarargs
     public final void init(Dao<? extends Entity>... daos) {
 
@@ -45,6 +58,9 @@ public class EntityTransaction {
         );
     }
 
+    /**
+     * Фиксация с момента последних изменений
+     */
     public void commit() {
         try {
             connection.commit();
@@ -54,6 +70,9 @@ public class EntityTransaction {
         }
     }
 
+    /**
+     * Включение авто-фиксации изменений
+     */
     public void endTransaction() {
 
         try {
@@ -64,6 +83,9 @@ public class EntityTransaction {
         }
     }
 
+    /**
+     * Откат изменений, может потребоваться для обеспечении безопасности данных
+     */
     public void rollBack() {
 
         try {

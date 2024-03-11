@@ -13,7 +13,7 @@ public abstract class Dao<T extends Entity> {
     /**
      * Получить объект из таблицы
      * @param id идентификатор
-     * @return оьъект T, расширяющий класс Entity
+     * @return оьъект, расширяющий класс Entity
      */
     public abstract T get(int id);
 

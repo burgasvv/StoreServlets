@@ -2,15 +2,20 @@ package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
+/***
+ * Сущность, которая описывает таблицу продуктов в базе данных
+ * name - наименование продукта
+ * description - описание продукта
+ * price - цена продукта
+ */
 public class Product extends Entity {
 
-    private int id;
     private String name;
     private String description;
     private double price;
 
     public Product(int id, String name, String description, double price) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.description = description;
         this.price = price;
@@ -20,14 +25,6 @@ public class Product extends Entity {
         this.name = name;
         this.description = description;
         this.price = price;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -55,17 +52,17 @@ public class Product extends Entity {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Product product = (Product) object;
-        return id == product.id && Double.compare(price, product.price) == 0
-                && Objects.equals(name, product.name) && Objects.equals(description, product.description);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Double.compare(price, product.price) == 0 &&
+                Objects.equals(name, product.name) && Objects.equals(description, product.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price);
+        return Objects.hash(name, description, price);
     }
 
     @Override

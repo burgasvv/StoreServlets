@@ -2,14 +2,18 @@ package com.burgas.storeservlets.entity;
 
 import java.util.Objects;
 
+/**
+ * Сущность, которая описывает таблицу заказов в базе данных
+ * orderNumber - номер заказа
+ * date - дата формирования заказа
+ */
 public class Order extends Entity{
 
-    private int id;
     private String orderNumber;
     private String date;
 
     public Order(int id, String orderNumber, String date) {
-        this.id = id;
+        super(id);
         this.orderNumber = orderNumber;
         this.date = date;
     }
@@ -17,14 +21,6 @@ public class Order extends Entity{
     public Order(String orderNumber, String date) {
         this.orderNumber = orderNumber;
         this.date = date;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getOrderNumber() {
@@ -44,16 +40,16 @@ public class Order extends Entity{
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Order order = (Order) object;
-        return id == order.id && Objects.equals(orderNumber, order.orderNumber) && Objects.equals(date, order.date);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(orderNumber, order.orderNumber) && Objects.equals(date, order.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, orderNumber, date);
+        return Objects.hash(orderNumber, date);
     }
 
     @Override
