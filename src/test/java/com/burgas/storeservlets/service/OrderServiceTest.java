@@ -215,4 +215,70 @@ public class OrderServiceTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void createAndGetSqlException() {
+
+        String insertOrder = "insert into orders(order_number, date) VALUES (?,now())";
+
+        String insertProducts = "do $$\n" +
+                "    declare\n" +
+                "        count integer := 1;\n" +
+                "        idOrder integer = (select orders.id from orders where id = ?);\n" +
+                "        end_loop integer = (select count(*) from (\n" +
+                "                     select order_products.product_id as idProduct from order_products\n" +
+                "                        join orders o on o.id = order_products.order_id\n" +
+                "                        join products p on p.id = order_products.product_id\n" +
+                "                     where (select date::date) = now()::date\n" +
+                "                 ) as opopiP);\n" +
+                "    begin\n" +
+                "        while count <= end_loop\n" +
+                "            loop\n" +
+                "                insert into order_products(order_id, product_id, product_count)\n" +
+                "                values (idOrder,\n" +
+                "                        (select array(select opopiP2.idproduct from\n" +
+                "                       (select order_products.product_id as idProduct from order_products\n" +
+                "                                join orders o on o.id = order_products.order_id\n" +
+                "                                join products p on p.id = order_products.product_id\n" +
+                "                             where (select date::date) = now()::date) as opopiP2))[count],\n" +
+                "                        (select floor(random() * 10 + 1)::integer));\n" +
+                "                count := count + 1;\n" +
+                "            end loop;\n" +
+                "    end;\n" +
+                "$$";
+
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
+             PreparedStatement insertProductsStatement = connection.prepareStatement(insertProducts)){
+
+
+            Assertions.assertThrows(SQLException.class, insertOrderStatement::execute);
+            Assertions.assertThrows(SQLException.class, insertProductsStatement::execute);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void getAndDeleteSqlException() {
+
+        String select = "select order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
+                "where name = ? and product_count = ? and order_id = orders.id;";
+
+        String delete = "delete from orders using products, order_products " +
+                "where name = ? and product_count = ? and order_id = orders.id";
+
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement selectStatement = connection.prepareStatement(select);
+             PreparedStatement deleteStatement = connection.prepareStatement(delete)){
+
+            Assertions.assertThrows(SQLException.class, selectStatement::execute);
+            Assertions.assertThrows(SQLException.class, deleteStatement::execute);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
