@@ -121,4 +121,51 @@ public class OrderServiceTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void getByProductNameSuccess() {
+
+        OrderService orderService = new OrderService();
+        String productName = "Apples";
+        List<String> byProductName = orderService.getByProductName(productName);
+
+        Assertions.assertEquals(4, byProductName.size());
+        Assertions.assertIterableEquals(
+                new ArrayList<>(List.of("C85", "A50", "A25", "C60")),
+                byProductName
+        );
+    }
+
+    @Test
+    public void getByProductNameAssertionException() {
+
+        OrderService orderService = new OrderService();
+        String productName = "Apples";
+        List<String> byProductName = orderService.getByProductName(productName);
+
+        Assertions.assertNotEquals(3, byProductName.size());
+        Assertions.assertThrows(
+                AssertionFailedError.class,
+                () -> Assertions.assertEquals("A25", byProductName.get(0))
+        );
+    }
+
+    @Test
+    public void getByProductNameSqlException() {
+
+        String query = "select orders.order_number\n" +
+                "from orders\n" +
+                "         join order_products op on orders.id = op.order_id\n" +
+                "         join products p on p.id = op.product_id\n" +
+                "where name = ?";
+
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
+
+            Assertions.assertThrows(SQLException.class, statement::execute);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
