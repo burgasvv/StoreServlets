@@ -168,4 +168,51 @@ public class OrderServiceTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void getByProductNameAndDateSuccess() {
+
+        OrderService orderService = new OrderService();
+        String productName = "Lemonade";
+        List<String> byProductNameAndDate = orderService.getByProductNameAndDate(productName);
+
+        Assertions.assertEquals(4, byProductNameAndDate.size());
+        Assertions.assertIterableEquals(
+                new ArrayList<>(List.of("A50", "B40", "C60", "C85")),
+                byProductNameAndDate
+        );
+    }
+
+    @Test
+    public void getByProductNameAndDateAssertionException() {
+
+        OrderService orderService = new OrderService();
+        String productName = "Lemonade";
+        List<String> byProductNameAndDate = orderService.getByProductNameAndDate(productName);
+
+        Assertions.assertNotEquals(10, byProductNameAndDate.size());
+        Assertions.assertThrows(
+                AssertionFailedError.class,
+                () -> Assertions.assertEquals("A25", byProductNameAndDate.get(0))
+        );
+    }
+
+    @Test
+    public void getByProductNameAndDateSqlException() {
+
+        String query = "select orders.order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id\n" +
+                "join products p on p.id = op.product_id\n" +
+                "where name = ? and (select date::date) = now()::timestamp::date\n" +
+                "group by orders.order_number";
+
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
+
+            Assertions.assertThrows(SQLException.class, statement::execute);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

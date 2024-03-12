@@ -134,11 +134,10 @@ public class OrderService {
 
         List<String> orderNumbers = new ArrayList<>();
 
-        String query = "select orders.order_number\n" +
-                "from orders\n" +
-                "         join order_products op on orders.id = op.order_id\n" +
-                "         join products p on p.id = op.product_id\n" +
-                "where name != ? and (select date::timestamp::date) = now()::timestamp::date\n" +
+        String query = "select orders.order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id\n" +
+                "join products p on p.id = op.product_id\n" +
+                "where name = ? and (select date::date) = now()::timestamp::date\n" +
                 "group by orders.order_number";
 
         try (Connection connection = DbManager.createConnection();
