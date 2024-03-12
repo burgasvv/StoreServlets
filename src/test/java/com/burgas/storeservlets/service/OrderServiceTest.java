@@ -1,6 +1,5 @@
 package com.burgas.storeservlets.service;
 
-
 import com.burgas.storeservlets.entity.Order;
 import com.burgas.storeservlets.entity.OrderProduct;
 import com.burgas.storeservlets.entity.Product;
@@ -28,13 +27,14 @@ public class OrderServiceTest {
         Assertions.assertIterableEquals(
                 new ArrayList<>(
                         List.of(
-                                new OrderProduct(new Product("Apples","For eat",150.5),
-                                        new Order(orderNumber,"2024-03-11 16:46:40.333745"),
+                                new OrderProduct(
+                                        new Product("Apples","For eat",150.5),
+                                        new Order(orderNumber, info.get(0).getOrder().getDate()),
                                         5
                                         ),
                                 new OrderProduct(
                                         new Product("Potatoes","For eat",75.34),
-                                        new Order(orderNumber,"2024-03-11 16:46:40.333745"),
+                                        new Order(orderNumber, info.get(1).getOrder().getDate()),
                                         12
                                         )
                                 )
@@ -64,6 +64,53 @@ public class OrderServiceTest {
                 "         join order_products op on orders.id = op.order_id\n" +
                 "         join products p on p.id = op.product_id\n" +
                 "where order_number = ?";
+
+        try (Connection connection = DbManager.createConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
+
+            Assertions.assertThrows(SQLException.class, statement::execute);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void getBySuccess() {
+
+        OrderService orderService = new OrderService();
+        int price = 3000;
+        int productCount = 3;
+        List<String> serviceBy = orderService.getBy(price, productCount);
+
+        Assertions.assertEquals(2, serviceBy.size());
+        Assertions.assertIterableEquals(
+                new ArrayList<>(List.of("B40", "B44")),
+                serviceBy
+        );
+    }
+
+    @Test
+    public void getByAssertionException() {
+
+        OrderService orderService = new OrderService();
+        int price = 3000;
+        int productCount = 3;
+        List<String> serviceBy = orderService.getBy(price, productCount);
+
+        Assertions.assertEquals(2, serviceBy.size());
+        Assertions.assertThrows(
+                AssertionFailedError.class,
+                () -> Assertions.assertEquals("A25", serviceBy.get(0))
+        );
+    }
+
+    @Test
+    public void getBySqlException() {
+
+        String query = "select orders.order_number from orders\n" +
+                "join order_products op on orders.id = op.order_id join products p on p.id = op.product_id\n" +
+                "group by orders.order_number having sum(product_count * price) < ? and count(product_id) = ?";
 
         try (Connection connection = DbManager.createConnection();
              PreparedStatement statement = connection.prepareStatement(query)){
