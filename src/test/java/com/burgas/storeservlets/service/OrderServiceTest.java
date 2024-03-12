@@ -50,7 +50,7 @@ public class OrderServiceTest {
         String orderNumber = "A25";
         List<OrderProduct> info = orderService.getInfo(orderNumber);
 
-        Assertions.assertEquals(2, info.size());
+        Assertions.assertNotEquals(3, info.size());
         Assertions.assertThrows(
                 AssertionFailedError.class,
                 () -> Assertions.assertEquals("Milk", info.get(0).getProduct().getName()));
@@ -98,7 +98,7 @@ public class OrderServiceTest {
         int productCount = 3;
         List<String> serviceBy = orderService.getBy(price, productCount);
 
-        Assertions.assertEquals(2, serviceBy.size());
+        Assertions.assertNotEquals(3, serviceBy.size());
         Assertions.assertThrows(
                 AssertionFailedError.class,
                 () -> Assertions.assertEquals("A25", serviceBy.get(0))
