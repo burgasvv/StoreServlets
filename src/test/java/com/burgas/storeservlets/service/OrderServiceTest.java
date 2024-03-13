@@ -251,7 +251,6 @@ public class OrderServiceTest {
              PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
              PreparedStatement insertProductsStatement = connection.prepareStatement(insertProducts)){
 
-
             Assertions.assertThrows(SQLException.class, insertOrderStatement::execute);
             Assertions.assertThrows(SQLException.class, insertProductsStatement::execute);
 
