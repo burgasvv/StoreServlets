@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.burgas.storeservlets.service.OrderService;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Objects;
 
 @WebServlet(name = "TaskFiveServlet", value = "/task_five-servlet")
@@ -20,8 +21,16 @@ public class TaskFiveServlet extends HttpServlet {
                 req.getParameter("order_number"),
                 "The order number is null"
         );
+
         OrderService service = new OrderService();
-        req.setAttribute("order", service.createAndGet(orderNumber));
+
+        try {
+            req.setAttribute("order", service.createAndGet(orderNumber));
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         req.getRequestDispatcher("/task/task_five.jsp").forward(req,resp);
     }
 }

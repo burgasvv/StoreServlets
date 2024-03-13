@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.burgas.storeservlets.service.OrderService;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Objects;
 
 @WebServlet(name = "TaskSixServlet", value = "/task_six-servlet")
@@ -24,8 +25,16 @@ public class TaskSixServlet extends HttpServlet {
                 req.getParameter("product_count"),
                 "The product count is null"
         );
+
         OrderService service = new OrderService();
-        req.setAttribute("order numbers", service.getAndDelete(productName, Integer.parseInt(productCount)));
+
+        try {
+            req.setAttribute("order numbers", service.getAndDelete(productName, Integer.parseInt(productCount)));
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         req.getRequestDispatcher("/task/task_six.jsp").forward(req,resp);
     }
 }

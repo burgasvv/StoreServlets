@@ -9,6 +9,7 @@ import com.burgas.storeservlets.manager.DbManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class OrderService {
 
@@ -164,7 +165,7 @@ public class OrderService {
      * @param orderNumber номер заказа
      * @return информацию о заказе
      */
-    public List<OrderProduct> createAndGet(String orderNumber) {
+    public List<OrderProduct> createAndGet(String orderNumber) throws SQLException {
 
         String insertOrder = "insert into orders(order_number, date) VALUES (?,now())";
 
@@ -194,11 +195,17 @@ public class OrderService {
                 "    end;\n" +
                 "$$";
 
-        try (Connection connection = DbManager.createConnection();
-             PreparedStatement insertOrderStatement = connection.prepareStatement(insertOrder);
-             PreparedStatement insertProductStatement = connection.prepareStatement(insertProducts)) {
+        Connection connection = null;
+        PreparedStatement insertOrderStatement;
+        PreparedStatement insertProductStatement = null;
 
+        try {
+
+            connection = DbManager.createConnection();
             connection.setAutoCommit(false);
+
+            insertOrderStatement = connection.prepareStatement(insertOrder);
+            insertProductStatement = connection.prepareStatement(insertProducts);
 
             insertOrderStatement.setString(1, orderNumber);
             insertOrderStatement.execute();
@@ -210,7 +217,19 @@ public class OrderService {
             return getInfo(orderNumber);
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+
+            } catch (SQLException ex) {
+                throw new OrderServiceException("Can't rollback transaction.", e.getCause());
+            }
+
             throw new OrderServiceException("Can't create and get order number", e.getCause());
+
+        } finally {
+            Objects.requireNonNull(insertProductStatement).close();
+            Objects.requireNonNull(insertProductStatement).close();
+            Objects.requireNonNull(connection).close();
         }
     }
 
@@ -221,7 +240,7 @@ public class OrderService {
      * @param count количество товара
      * @return удаленные заказы
      */
-    public List<String> getAndDelete(String name, int count) {
+    public List<String> getAndDelete(String name, int count) throws SQLException {
 
         List<String> orderNumbers = new ArrayList<>();
 
@@ -232,11 +251,17 @@ public class OrderService {
         String delete = "delete from orders using products, order_products " +
                 "where name = ? and product_count = ? and order_id = orders.id";
 
-        try (Connection connection = DbManager.createConnection();
-             PreparedStatement selectStatement = connection.prepareStatement(select);
-             PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        PreparedStatement deleteStatement = null;
 
+        try {
+
+            connection = DbManager.createConnection();
             connection.setAutoCommit(false);
+
+            selectStatement = connection.prepareStatement(select);
+            deleteStatement = connection.prepareStatement(delete);
 
             selectStatement.setString(1, name);
             selectStatement.setInt(2, count);
@@ -256,7 +281,19 @@ public class OrderService {
             return orderNumbers;
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
             throw new OrderServiceException("Can't delete order number", e.getCause());
+        } finally {
+
+            Objects.requireNonNull(deleteStatement).close();
+            Objects.requireNonNull(selectStatement).close();
+            Objects.requireNonNull(connection).close();
         }
     }
 }
